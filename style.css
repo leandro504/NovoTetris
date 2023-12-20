@@ -2,6 +2,13 @@
     padding: 0;
     box-sizing: border-box;
 }
+#nextShape {
+    position: absolute;
+    border: 1px solid purple;
+    width: 200px;
+    height: 200px;
+    left: 420px;
+}
 
 #canvas1{
     position: absolute;

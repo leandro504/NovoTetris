@@ -15,15 +15,11 @@ class Tetris {
                 if(realY + 1 >= squareCountY){
                     return false;
                 }
-                if(gameMap[realY + 1][realX].imageX != -1){
+                if(gameMap[realY + 1][realX].imageX !== -1){
                     return false;
                 }
-                console.log(realX,"realX")
-                console.log(realY,"realY")
             }
         }
-        console.log(squareCountY,"squareCountY")
-        console.log(squareCountX,"squareCountX")
         return true;
 
     }
@@ -40,7 +36,7 @@ class Tetris {
                 if(realX + 1 >= squareCountX){
                     return false;
                 }
-                if(gameMap[realY][realX + 1].imageX != -1){
+                if(gameMap[realY][realX + 1].imageX !== -1){
                     return false;
                 }
             }
@@ -56,7 +52,7 @@ class Tetris {
                 if(realX - 1 < 0){
                     return false;
                 }
-                if(gameMap[realY][realX - 1].imageX != -1){
+                if(gameMap[realY][realX - 1].imageX !== -1){
                     return false;
                 }
             }
@@ -85,7 +81,7 @@ class Tetris {
     let n = this.template.length;
     for(let layer = 0; layer < n / 2; layer++){
         let first = layer;
-        let last = n - 1 - first;
+        let last = n - 1 - layer;
         for(let i = first; i < last; i++){
 
             let offset = i - first;
@@ -93,10 +89,11 @@ class Tetris {
              this.template[first][i] = this.template[i][last];
             this.template[i][last] = this.template[last][last - offset];
             this.template[last][last - offset] = this.template[last - offset][first];
-            this.template[last - offset][first] = this.template[last - offset][first] = top;
+            this.template[last - offset][first] = top;
         }
         for(let i = 0; i < this.template.length; i++){
             for(let j = 0; j < this.template.length; j++){
+                if(this.template[i][j] == 0) continue;
                 let realX = i + this.getTruncadPosition().x;
                 let realY = j + this.getTruncadPosition().y;
                 if(
@@ -105,7 +102,7 @@ class Tetris {
                     realY < 0 ||
                     realY >= squareCountY
                 ){
-                    tempTemplate = this.template;
+                    this.template = tempTemplate;
                     return false;
                 }
             }
@@ -114,6 +111,8 @@ class Tetris {
     }
 }
 const canvas = document.getElementById('canvas1');
+const nextShapeCanvas = document.getElementById('nextShape');
+const nctx = nextShapeCanvas.getContext('2d');
 const ctx = canvas.getContext('2d');
 const image = document.getElementById('image');
 const imageSquareSize = 20;
@@ -167,6 +166,8 @@ const Shapes = [
 let gameOver;
 let currentShape;
 let initialTwoDrr;
+let nextShape;
+
 
 let deleteCompleteRows = ()=>{
     for(let i = 0; i < gameMap.length; i++){
@@ -207,6 +208,28 @@ let drawCurrentShape = () => {
     }
 };
 
+let drawNextShape = ()=>{
+    
+    nctx.fillRect(0, 0, nextShapeCanvas.width, nextShapeCanvas.height)
+   for(let i = 0; i < nextShape.template.length; i++){
+    for(let j = 0; j < nextShape.template.length; j++){
+        if(nextShape.template[i][j] == 0) continue;
+        nctx.drawImage(
+            image,
+            nextShape.imageX,
+            nextShape.imageY,
+            imageSquareSize,
+            imageSquareSize,
+            size * i + 50,
+            size * j + size * 3,
+            size,
+            size
+        )
+       
+    }
+   }
+}
+
 let drawSquares = () => {
     for (let i = 0; i < gameMap.length; i++) {
         let t = gameMap[i];
@@ -227,6 +250,7 @@ let drawSquares = () => {
     }
 };
 
+
 let update = ()=>{
     if(gameOver) return;
     if(currentShape.CheckBotton()){
@@ -241,7 +265,8 @@ let update = ()=>{
             }
         }
         deleteCompleteRows();
-        currentShape = getRandomShapes();
+        currentShape = nextShape;
+        nextShape = getRandomShapes();
         if(!currentShape.CheckBotton()){
             resetVars();
         }
@@ -256,7 +281,9 @@ let draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawCurrentShape();
     drawSquares();
+    drawNextShape();
 }
+
 
 let gameLoop = () => {
 
@@ -274,6 +301,7 @@ let resetVars = () => {
         initialTwoDrr.push(temp);
     }
     currentShape = getRandomShapes();
+    nextShape = getRandomShapes();
     gameMap = initialTwoDrr;
 
 }
